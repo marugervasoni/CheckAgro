@@ -67,8 +67,6 @@
 			<version>1.4.2.Final</version>
 		</dependency>
 
-
-
 		<!-- dependencia principal de Feign -->
 		<dependency>
 			<groupId>io.github.openfeign</groupId>
@@ -89,6 +87,14 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-config</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-bootstrap</artifactId>
 		</dependency>
 
 	</dependencies>
