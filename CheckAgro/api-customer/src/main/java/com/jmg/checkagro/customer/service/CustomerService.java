@@ -6,9 +6,6 @@ import com.jmg.checkagro.customer.exception.MessageCode;
 import com.jmg.checkagro.customer.model.Customer;
 import com.jmg.checkagro.customer.repository.CustomerRepository;
 import com.jmg.checkagro.customer.utils.DateTimeUtils;
-import feign.Feign;
-import feign.jackson.JacksonEncoder;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -18,11 +15,11 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
 
-    @Value("${urlCheck}")
-    private String urlCheck;
+    private final CheckMSClient client;
 
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository, CheckMSClient client) {
         this.customerRepository = customerRepository;
+        this.client = client;
     }
 
     @Transactional
@@ -40,9 +37,6 @@ public class CustomerService {
     }
 
     private void registerCustomerInMSCheck(Customer entity) {
-        CheckMSClient client = Feign.builder()
-                .encoder(new JacksonEncoder())
-                .target(CheckMSClient.class, urlCheck);
         client.registerCustomer(CheckMSClient.DocumentRequest.builder()
                 .documentType(entity.getDocumentType())
                 .documentValue(entity.getDocumentNumber())
@@ -50,9 +44,6 @@ public class CustomerService {
     }
 
     private void deleteCustomerInMSCheck(Customer entity) {
-        CheckMSClient client = Feign.builder()
-                .encoder(new JacksonEncoder())
-                .target(CheckMSClient.class, urlCheck);
         client.deleteCustomer(CheckMSClient.DocumentRequest.builder()
                 .documentType(entity.getDocumentType())
                 .documentValue(entity.getDocumentNumber())
@@ -73,7 +64,6 @@ public class CustomerService {
         var entityDelete = customerRepository.findById(id).orElseThrow(() -> new CustomerException(MessageCode.CUSTOMER_NOT_FOUND));
         customerRepository.updateActive(false, id);
         deleteCustomerInMSCheck(entityDelete);
-
     }
 
     public Customer getById(Long id) throws CustomerException {
