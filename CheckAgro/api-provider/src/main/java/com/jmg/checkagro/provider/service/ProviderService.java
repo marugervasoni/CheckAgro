@@ -6,6 +6,10 @@ import com.jmg.checkagro.provider.exception.ProviderException;
 import com.jmg.checkagro.provider.model.Provider;
 import com.jmg.checkagro.provider.repository.ProviderRepository;
 import com.jmg.checkagro.provider.utils.DateTimeUtils;
+
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -34,12 +38,20 @@ public class ProviderService {
         return entity.getId();
     }
 
+    //agrego anotaciones circuit braker y retry
+    @Retry(name = "retryProvider")
+    @CircuitBreaker(name = "clientProvider", fallbackMethod = "registerProviderFallback")
     private void registerProviderInMSCheck(Provider entity) {
 
         client.registerProvider(CheckMSClient.DocumentRequest.builder()
                 .documentType(entity.getDocumentType())
                 .documentValue(entity.getDocumentNumber())
                 .build());
+    }
+
+    //agrego fallback method
+    public void registerProviderFallback(Provider entity, Throwable t) throws Exception {
+        throw new Exception("Not found provider");
     }
 
     private void deleteProviderInMSCheck(Provider entity) {

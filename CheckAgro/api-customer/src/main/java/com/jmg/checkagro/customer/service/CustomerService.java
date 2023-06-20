@@ -36,11 +36,19 @@ public class CustomerService {
         return entity.getId();
     }
 
+    //agrego anotaciones circuit braker y retry
+    @Retry(name = "retryCustomer")
+    @CircuitBreaker(name = "clientCustomer", fallbackMethod = "registerCustomerFallback")
     private void registerCustomerInMSCheck(Customer entity) {
         client.registerCustomer(CheckMSClient.DocumentRequest.builder()
                 .documentType(entity.getDocumentType())
                 .documentValue(entity.getDocumentNumber())
                 .build());
+    }
+
+    //agrego fallback method
+    public void registerCustomerFallback(Customer entity, Throwable t) throws Exception {
+        throw new Exception("Not found customer");
     }
 
     private void deleteCustomerInMSCheck(Customer entity) {
